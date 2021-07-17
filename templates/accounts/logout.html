@@ -1,0 +1,15 @@
+{% extends "./base.html" %}
+
+{% block title %}Logout{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center mt-5 p-5" style="background-color: #e0e0e0">
+        <div class="container col-6">
+            <h1>Logout</h1>
+            <p class="fs-5 text-muted">You are Successfully Logged Out.</p>
+            <p class="fs-5 text-muted">Now you can <a href="{% url 'login' %}">Login</a> Again.</p>
+        </div>
+    </div>
+
+{% endblock %}

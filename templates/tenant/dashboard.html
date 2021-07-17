@@ -1,0 +1,14 @@
+{% extends './base.html' %}
+
+{% block title %}Tenant Dashboard{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center mt-5 p-5" style="background-color: #e0e0e0">
+        <div class="container col-6">
+            <h1>Welcome to your Dashboard {{ user_type }}</h1>
+            <p class="fs-5 text-muted">How can we help you {{ user.first_name }}</p>
+        </div>
+    </div>
+
+{% endblock %}

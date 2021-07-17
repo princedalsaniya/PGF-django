@@ -1,0 +1,8 @@
+{% autoescape off %}
+
+Hi {{ user.username }},
+
+Please click on the link to verify your email and progress in creating your account,
+http://{{ domain }}{% url 'verfiyEmail' uidb64=uid token=token %}
+
+{% endautoescape %}

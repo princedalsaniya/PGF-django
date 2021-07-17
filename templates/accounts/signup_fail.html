@@ -1,0 +1,19 @@
+{% extends "./base.html" %}
+
+{% block title %}Login Error{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center mt-5 p-5" style="background-color: #e0e0e0">
+        <div class="container col-6">
+            <h1>Error</h1>
+            {% if has_error %}
+                {% for m in messages %}
+                    <p class="fs-5 text-muted">{{ m }}</p>
+                {% endfor %}
+            {% endif %}
+            <p class="fs-5 text-muted">You can <a href="{% url 'signup' %}">Signup</a> Again.</p>
+        </div>
+    </div>
+
+{% endblock %}
