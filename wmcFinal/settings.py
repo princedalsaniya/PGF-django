@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'accounts',
     'tenant',
     'owner',
+    'cloudinary',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -136,3 +137,14 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'princeforstudy@gmail.com'
 EMAIL_HOST_PASSWORD = 'prince9558867506'
 EMAIL_USE_TLS = True
+
+#Cloudinary stuff is here.
+
+import cloudinary
+
+cloudinary.config(
+  cloud_name= "princedalsaniya",
+  api_key= "129677266313812",
+  api_secret= "JhCu-ovlc6c4dqle4JGFDD7Ga-I",
+  secure= True
+)

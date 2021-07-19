@@ -1,0 +1,18 @@
+{% extends "./base.html" %}
+
+{% block title %}Logout{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center mt-5 p-5" style="background-color: #e0e0e0">
+        <div class="container col-6">
+            <h1>Profile Set.</h1>
+            <p class="fs-5 text-muted">Your profile is successfully set {{fname}}.</p>
+            <p class="fs-5 text-muted">Here is your Profile Pic</p>
+            {% load cloudinary %}
+            <img src={{profielPic}} alt="">
+            <p class="fs-5 text-muted">Now you can <a href="{% url 'login' %}">Login</a>.</p>
+        </div>
+    </div>
+
+{% endblock %}

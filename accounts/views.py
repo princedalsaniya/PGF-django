@@ -1,5 +1,6 @@
+from cloudinary import CloudinaryImage
 from django.shortcuts import render, HttpResponse, reverse, redirect
-from .forms import LoginForm, SignUpForm
+from .forms import LoginForm, SignUpForm, createTenantProfileForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -7,12 +8,14 @@ from .models import Tenant, Owner
 from django.contrib.auth.models import User
 
 #for sending the verification mails.
-from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeError
+from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from .token import token_generator
 from django.template.loader import render_to_string
+
+import cloudinary
 
 # Create your views here.
 def user_login(request):
@@ -34,12 +37,12 @@ def user_login(request):
                         tenant = Tenant.objects.filter(user=user)
                         if tenant:
                             login(request, user)
-                            request.session['tenant'] = tenant[0]
+                            request.session['tenant_id'] = getattr(tenant[0], 'tenantID')
                             return render(request, 'tenant/dashboard.html')
                         else:
                             messages.add_message(request, messages.ERROR, "You have chose wrong user type.")
                             return render(request, 'accounts/login_fail.html')
-                    elif user_type == 'PG Owner':
+                    elif user_type == 'Owner':
                         owner = Owner.objects.filter(user=user)
                         if owner:
                             login(request, user)
@@ -69,6 +72,7 @@ def user_login(request):
     login_form = LoginForm()
     return render(request, 'accounts/login.html', {'login_form': login_form})
 
+@login_required
 def user_logout(request):
     logout(request)
     return render(request, 'accounts/logout.html')
@@ -78,13 +82,13 @@ def signup(request):
     if request.method == 'POST':
         context = {'has_error': False}
         s_form = SignUpForm(request.POST)
+
         if s_form.is_valid:
             username = request.POST.get('username')
-            fname = request.POST.get('first_name')
-            lname = request.POST.get('last_name')
             email = request.POST.get('email')
             pwd1 = request.POST.get('password1')
             pwd2 = request.POST.get('password2')
+            type = request.POST.get('type')
 
             if User.objects.filter(username=username).exists():
                 messages.add_message(request, messages.ERROR, "Username is already taken.")
@@ -98,12 +102,13 @@ def signup(request):
             else:
                 new_user = s_form.save(commit=False)
                 new_user.is_active = False
-                request.session['newuser'] = new_user
                 new_user.set_password(pwd1)
                 new_user.save()
+                request.session['new_user_id'] = getattr(new_user, "id")
+                request.session['new_user_type'] = type
 
                 #sending email
-                uidb64 = urlsafe_base64_encode(force_bytes(new_user.pk))
+                uidb64 = urlsafe_base64_encode(force_bytes(getattr(new_user, 'id')))
                 domain = get_current_site(request).domain
                 # link = reverse('verfiyEmail', kwargs={'uidb64': uidb64, })
                 email_subject = "Email verification for PGF account."
@@ -123,7 +128,7 @@ def signup(request):
                     [email],
                 )
                 email.send(fail_silently=False)
-                return render(request, 'accounts/email_sent.html', {'new_user': new_user})
+                return render(request, 'accounts/email_sent.html')
         else:
             messages.add_message(request, messages.ERROR, "You might have made mistake in filling the form. So, please try again.")
             context['has_error'] = True
@@ -138,7 +143,7 @@ def verfy_email(request, uidb64, token):
 
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
+        user = User.objects.get(id=uid)
 
     except Exception as e:
         user = None
@@ -154,3 +159,47 @@ def verfy_email(request, uidb64, token):
 
     messages.add_message(request, messages.ERROR, "Ooohhh!! error occurred during your Email Verification.")
     return render(request, 'accounts/email_verified_fail.html')
+
+def set_tenant(request):
+    type = request.session['new_user_type']
+
+    if type == 'Tenant':
+        publicID = makePID(getNextPID_tenant())
+        if request.method == 'POST':
+            profile_form = createTenantProfileForm(request.POST)
+            pid = getNextPID_tenant()
+            print(request.session['new_user_id'])
+            if profile_form.is_valid:
+
+                user = User.objects.get(id=request.session['new_user_id'])
+                phone = request.POST.get('phone')
+                workplace = request.POST.get('workplace')
+                adharNo = request.POST.get('adharNo')
+                bdate = request.POST.get('bdate')
+                profilePicID = makePID(pid)
+
+                new_tenant = Tenant(user=user, tenantID=pid, phone=phone, workplace=workplace, adharNo=adharNo, bdate=bdate, profilePicID=profilePicID)
+                new_tenant.save()
+                context = {
+                    'fname': getattr(user, 'first_name'),
+                    'profielPic': cloudinary.CloudinaryImage(publicID).build_url(width = 200, height = 200, crop = 'fill')
+                }
+                return render(request, './accounts/set_profile_done.html', context)
+
+        profile_form = createTenantProfileForm()
+        return render(request, './accounts/set_profile_tenant.html', {'profile_form': profile_form, 'pid': publicID})
+
+
+#Utility Functions
+def getNextPID_tenant():
+    id = 1
+    lastTenant = Tenant.objects.all().last()
+    if lastTenant:
+        id = int(getattr(lastTenant, 'tenantID')[1:])+1
+        nextPID = "t" + str(id)
+        return nextPID
+    nextPID = "t" + str(id)
+    return nextPID
+
+def makePID(pid):
+    return "PGF/Profiles/"+pid

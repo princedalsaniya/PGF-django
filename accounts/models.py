@@ -9,7 +9,7 @@ class Tenant(models.Model):
     workplace = models.CharField(max_length=500)
     bdate = models.DateField(null=False)
     # isVarified = models.BooleanField(default=False)
-    profilePicID = models.CharField(unique=True, max_length=200, null=False)
+    profilePicID = models.CharField(unique=True, max_length=200, null=True)
     adharNo = models.CharField(unique=True, max_length=20, null=False)
 
     def __str__(self):
