@@ -12,7 +12,7 @@
     </div>
 
     <div class="container col-6 text-center mt-4 p-3">
-        <form action="{% url 'o_register_pg_photos' %}" method="post">
+        <form action="{% url 'upload_new_photo' %}" method="post">
             {% csrf_token %}
             {% for field in upload_form %}
             <p>
@@ -33,7 +33,7 @@
         </form>
 
         <div class="alert alert-success" role="alert" style="display:none" id="alert">
-          Photo uploaded successfully!!
+            Photo uploaded successfully!!
         </div>
 
     </div>
@@ -74,4 +74,5 @@
         false
       );
    </script>
+
 {% endblock %}

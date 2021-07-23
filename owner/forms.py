@@ -56,7 +56,7 @@ class register_rules_form(forms.ModelForm):
     deposit = forms.IntegerField(label="Deposit Amount : ", min_value=0)
     class Meta:
         model = pgRules
-        fields = ('haveClosingTime', 'visitors', 'nonVeg', 'oppositeGender', 'smoking', 'drinking', 'loudMusic', 'party')
+        fields = ('deposit', 'haveClosingTime', 'visitors', 'nonVeg', 'oppositeGender', 'smoking', 'drinking', 'loudMusic', 'party')
         labels = {
             'haveClosingTime': 'Any time-limit for allowed entry in PG : ',
             'visitors': 'Visitors Allowed : ',

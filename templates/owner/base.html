@@ -53,10 +53,10 @@
         <div class="offcanvas-body text-center">
 
             {% load cloudinary %}
-            <img src={{profilePic}} >
+            {% cloudinary profilePicID format="jpg" width=200 height=200 crop="fill" %}
             <p class="text-center text-dark fs-5 m-3">{{ user.first_name }} {{ user.last_name }}</p>
             <hr>
-            <a href="#" class="nav-link fs-4 active text-dark font-weight-bold">PG List</a>
+            <a href="{% url 'o_pglist' %}" class="nav-link fs-4 active text-dark font-weight-bold">PG List</a>
             <a href="{% url 'o_register_pg_details' %}" class="nav-link fs-4 active text-dark font-weight-bold">Register New PG</a>
             <a href="#" class="nav-link fs-4 active text-dark font-weight-bold">Notifications</a>
             <a href="#" class="nav-link fs-4 active text-dark font-weight-bold">Profile</a>

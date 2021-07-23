@@ -1,0 +1,103 @@
+{% extends './base.html' %}
+
+{% block title %}{{ pg.name }}{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center mt-5 p-3" style="background-color: #e0e0e0">
+        <div class="container col-6">
+            <h1>Welcome to {{ pg.name }}.</h1>
+        </div>
+    </div>
+
+    <div class="container mt-4 p-2 col-md-8 text-center">
+
+        <hr>
+        <p class="mt-4 fs-2 text-dark text-weight-light">Here are the Details of the PG.</p>
+        <hr>
+        <form action="{% url 'edit_pgDetails' %}" method="post">
+            {% csrf_token %}
+            {% for field in edit_pg_details %}
+            <p>
+                {{ field.label }}
+                {{ field }}
+                {% if field.help_text %}
+                  <small style="display: none">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                  <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            </p>
+            {% endfor %}
+
+            <p><input class="btn btn-primary" type="submit" value="Upadte"></p>
+        </form>
+
+        <hr class="mt-5">
+        <p class="fs-2 text-dark text-weight-light">Here are the Facilities of the PG.</p>
+        <hr>
+        <form action="{% url 'edit_pgFacilities' %}" method="post">
+            {% csrf_token %}
+            {% for field in edit_pg_facilities %}
+            <p>
+                {{ field.label }}
+                {{ field }}
+                {% if field.help_text %}
+                  <small style="display: none">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                  <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            </p>
+            {% endfor %}
+
+            <p><input class="btn btn-primary" type="submit" value="Upadte"></p>
+        </form>
+
+        <hr class="mt-5">
+        <p class="fs-2 text-dark text-weight-light">Here are the Rules of the PG.</p>
+        <hr>
+        <form action="{% url 'edit_pgRules' %}" method="post">
+            {% csrf_token %}
+            {% for field in edit_pg_rules %}
+            <p>
+                {{ field.label }}
+                {{ field }}
+                {% if field.help_text %}
+                  <small style="display: none">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                  <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            </p>
+            {% endfor %}
+
+            <p><input class="btn btn-primary" type="submit" value="Upadte"></p>
+        </form>
+
+        <hr class="mt-5">
+        <p class="fs-2 text-dark text-weight-light">Here are the photos of the PG.</p>
+        <hr>
+        {% load cloudinary %}
+        <div class="container col-md-9 text-center">
+            {% for photo in photos %}
+                <div class="card mb-3" >
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% cloudinary photo.photoPID format="jpg" height=200 %}
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body text-end">
+                                <h5 class="card-title">Message</h5>
+                                <p class="card-text">{{ photo.message }}</p>
+                                <a href="{% url 'delete_photo' photoPID=photo.photoPID %}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <a href="{% url 'upload_new_photo' %}" class="btn btn-primary mt-5">Upload New Photo</a>
+        </div>
+
+    </div>
+{% endblock %}

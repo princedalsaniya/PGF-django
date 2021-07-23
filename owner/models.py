@@ -123,3 +123,12 @@ class ratings(models.Model):
     gym = models.FloatField(default=0.0)
     lift = models.FloatField(default=0.0)
     generator = models.FloatField(default=0.0)
+
+    def __str__(self):
+        return self.pg
+
+class pgApplication(models.Model):
+    pg = models.OneToOneField(pgDetails, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Owner, on_delete=models.CASCADE)
+    appicationDate = models.DateField(auto_now=True)
+    appicationTime = models.TimeField(auto_now=True)

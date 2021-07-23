@@ -1,9 +1,9 @@
 from django.shortcuts import render, HttpResponse, redirect
 from accounts.models import Owner
 from django.contrib.auth.decorators import login_required
-import cloudinary
+import cloudinary, cloudinary.api
 from .forms import register_new_pg_form, register_facilities_form, register_rules_form, register_photo_form
-from .models import pgDetails, pgFacilities, roomDetails, pgPhotos, pgRules, ratings, messages, applicationDetails
+from .models import pgDetails, pgFacilities, pgPhotos, pgRules, ratings, messages, applicationDetails, pgApplication
 
 # Create your views here.
 @login_required
@@ -12,11 +12,12 @@ def o_dashboard(request):
     user = request.user
     profilePublicID = getattr(Owner.objects.get(user=user), 'profilePicID')
     profilePic = cloudinary.CloudinaryImage(profilePublicID).build_url(width = 200, height = 200, crop = 'fill', gravity="face")
-
+    request.session['profilePublicID'] = profilePublicID
+    print("here it is : ", profilePublicID)
     context = {
         'user_type': user_type,
         'user': user,
-        'profilePic': profilePic,
+        'profilePicID': request.session['profilePublicID'],
     }
 
     return render(request, 'owner/dashboard.html', context)
@@ -127,12 +128,12 @@ def o_register_pg_photos(request):
             print(message)
             new_photo = pgPhotos(pg=pgDetails.objects.get(pgID=pgID), photoPID=photoPID, message=message)
             new_photo.save()
-            del request.session['photoPID']
             print("Photo saved")
-            return redirect('o_register_success')
+            return redirect('o_register_pg_photos')
 
     return render(request, './owner/register_pg_photos.html', {'tag': pgID})
 
+@login_required
 def o_upload_pic(request):
     upload_form = register_photo_form(request.POST or None)
     pgID = request.session['new_pgID']
@@ -142,8 +143,150 @@ def o_upload_pic(request):
 
     return render(request, './owner/upload_photo.html', {'upload_form': upload_form, 'tag': pgID, 'pid': pid})
 
+@login_required
 def o_register_success(request):
+    pgID = request.session['new_pgID']
+    pg = pgDetails.objects.get(pgID=pgID)
+    owner = Owner.objects.get(user=request.user)
+
+    print("before object")
+    newApplication = pgApplication(pg=pg, owner=owner)
+    newApplication.save()
+    print("saved the application")
+
     return render(request, './owner/register_success.html')
+
+@login_required
+def o_pglist(request):
+    owner = Owner.objects.get(user=request.user)
+    pgs = pgDetails.objects.filter(owner=owner)
+
+    return render(request, './owner/pg_list.html', {'pgs': pgs,'profilePicID': request.session['profilePublicID']})
+
+#curr_pgID is stored here.
+@login_required
+def pg_details(request, pgID):
+    pg = pgDetails.objects.get(pgID=pgID)
+    pg_facilities = pgFacilities.objects.get(pg=pg)
+    pg_rules = pgRules.objects.get(pg=pg)
+
+    request.session['curr_pgID'] = pgID
+    edit_pg_details = register_new_pg_form(instance=pg)
+    edit_pg_facilities = register_facilities_form(instance=pg_facilities)
+    edit_pg_rules = register_rules_form(instance=pg_rules)
+    photos = pgPhotos.objects.filter(pg=pg)
+
+    context = {
+        'profilePicID': request.session['profilePublicID'],
+        'tag': pgID,
+        'pg': pg,
+        'edit_pg_details': edit_pg_details,
+        'edit_pg_facilities': edit_pg_facilities,
+        'edit_pg_rules': edit_pg_rules,
+        'photos': photos,
+    }
+    return render(request, './owner/pg_details.html', context)
+
+def edit_pgDetails(request):
+    if request.method == "POST":
+        edit_details_form = register_new_pg_form(request.POST)
+        if edit_details_form.is_valid():
+            type = edit_details_form.cleaned_data.get('type')
+            floors = edit_details_form.cleaned_data.get('floors')
+            rooms = edit_details_form.cleaned_data.get('rooms')
+            total_intakes = edit_details_form.cleaned_data.get('total_intakes')
+            available_intakes = edit_details_form.cleaned_data.get('available_intakes')
+            start_rent = edit_details_form.cleaned_data.get('start_rent')
+            end_rent = edit_details_form.cleaned_data.get('end_rent')
+            name = edit_details_form.cleaned_data.get('name')
+            address = edit_details_form.cleaned_data.get('address')
+            area = edit_details_form.cleaned_data.get('area')
+            city = edit_details_form.cleaned_data.get('city')
+            state = edit_details_form.cleaned_data.get('state')
+            description = edit_details_form.cleaned_data.get('description')
+            owner = Owner.objects.get(user=request.user)
+            pgID = request.session['curr_pgID']
+            temp = pgDetails(type=type, floors=floors, rooms=rooms, total_intakes=total_intakes, available_intakes=available_intakes, start_rent=start_rent, end_rent=end_rent, name=name, address=address, area=area, city=city, state=state, description=description, owner=owner, pgID=pgID)
+            temp.save()
+            print("Updated.")
+
+    return redirect('pg_details', pgID)
+
+def edit_pgFacilities(request):
+    if request.method == "POST":
+        edit_facilities_form = register_facilities_form(request.POST)
+        if edit_facilities_form.is_valid():
+            pgID = request.session['curr_pgID']
+            pg = pgDetails.objects.get(pgID=pgID)
+
+            temp = pgFacilities.objects.get(pg=pg)
+
+            temp.ac = edit_facilities_form.cleaned_data.get('ac')
+            temp.balcony = edit_facilities_form.cleaned_data.get('balcony')
+            temp.laundry = edit_facilities_form.cleaned_data.get('laundry')
+            temp.breakfast = edit_facilities_form.cleaned_data.get('breakfast')
+            temp.lunch = edit_facilities_form.cleaned_data.get('lunch')
+            temp.dinner = edit_facilities_form.cleaned_data.get('dinner')
+            temp.parking = edit_facilities_form.cleaned_data.get('parking')
+            temp.cleaning = edit_facilities_form.cleaned_data.get('cleaning')
+            temp.wifi = edit_facilities_form.cleaned_data.get('wifi')
+            temp.tv = edit_facilities_form.cleaned_data.get('tv')
+            temp.fridge = edit_facilities_form.cleaned_data.get('fridge')
+            temp.ro = edit_facilities_form.cleaned_data.get('ro')
+            temp.gym = edit_facilities_form.cleaned_data.get('gym')
+            temp.lift = edit_facilities_form.cleaned_data.get('lift')
+            temp.generator = edit_facilities_form.cleaned_data.get('generator')
+            temp.save()
+
+    return redirect('pg_details', request.session['curr_pgID'])
+
+def edit_pgRules(request):
+    if request.method == "POST":
+        edit_rules_form = register_rules_form(request.POST)
+        if edit_rules_form.is_valid():
+            pgID = request.session['curr_pgID']
+            pg = pgDetails.objects.get(pgID=pgID)
+
+            temp = pgRules.objects.get(pg=pg)
+            temp.deposit = edit_rules_form.cleaned_data.get('deposit')
+            temp.haveClosingTime = edit_rules_form.cleaned_data.get('haveClosingTime')
+            temp.visitors = edit_rules_form.cleaned_data.get('visitors')
+            temp.nonVeg = edit_rules_form.cleaned_data.get('nonVeg')
+            temp.oppositeGender = edit_rules_form.cleaned_data.get('oppositeGender')
+            temp.smoking = edit_rules_form.cleaned_data.get('smoking')
+            temp.drinking = edit_rules_form.cleaned_data.get('drinking')
+            temp.loudMusic = edit_rules_form.cleaned_data.get('loudMusic')
+            temp.party = edit_rules_form.cleaned_data.get('party')
+
+            temp.save()
+
+    return redirect('pg_details', request.session['curr_pgID'])
+
+def delete_photo(request, photoPID):
+    pgPhotos.objects.filter(photoPID=photoPID).delete()
+    print("delete from database")
+    cloudinary.api.delete_resources([photoPID])
+    print("delete from cloud")
+
+    return redirect('pg_details', request.session['curr_pgID'])
+
+def upload_new_photo(request):
+    upload_form = register_photo_form(request.POST or None)
+    pgID = request.session['new_pgID']
+    photoPID = get_next_photoPID(pgID)
+    pid = "PGF/PG_Photos/" + pgID + "_" + photoPID
+    context = {
+        'pid': pid,
+        'tag': pgID,
+        'upload_form': upload_form,
+    }
+    if upload_form.is_valid():
+        message = upload_form.cleaned_data.get('message')
+        new_photo = pgPhotos(pg=pgDetails.objects.get(pgID=pgID), photoPID=pid, message=message)
+        new_photo.save()
+        print("saved")
+        return redirect('pg_details', pgID)
+    return render(request, './owner/upload_new_photo.html', context)
 
 #Utility Functions
 def get_next_pgID():
