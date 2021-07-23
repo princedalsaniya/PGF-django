@@ -13,26 +13,54 @@
     </div>
 
     <div class="container col-6 text-center mt-4 p-3">
+        {% if user == "Tenant" %}
         <form action="{% url 'set_tenant' %}" method="post">
+
             {% csrf_token %}
             {% for field in profile_form %}
             <p>
-                {{ field.label }}
-                {{ field }}
-                {% if field.help_text %}
-                  <small style="display: none">{{ field.help_text }}</small>
-                {% endif %}
-                {% for error in field.errors %}
-                  <p style="color: red">{{ error }}</p>
-                {% endfor %}
+              {{ field.label }}
+              {{ field }}
+              {% if field.help_text %}
+              <small style="display: none">{{ field.help_text }}</small>
+              {% endif %}
+              {% for error in field.errors %}
+            <p style="color: red">{{ error }}</p>
+            {% endfor %}
             </p>
             {% endfor %}
             <p>
-<!--                <label for="upload_widget">.</label>-->
-                <input id="upload_widget" type="button" name="profileID" value="Upload ProfilePic" >
+              <!--                <label for="upload_widget">.</label>-->
+              <input id="upload_widget" type="button" name="profileID" value="Upload ProfilePic">
             </p>
             <p><input type="submit" value="Submit"></p>
-        </form>
+
+          </form>
+        {% else %}
+        <form action="{% url 'set_owner' %}" method="post">
+
+            {% csrf_token %}
+            {% for field in profile_form %}
+            <p>
+              {{ field.label }}
+              {{ field }}
+              {% if field.help_text %}
+              <small style="display: none">{{ field.help_text }}</small>
+              {% endif %}
+              {% for error in field.errors %}
+            <p style="color: red">{{ error }}</p>
+            {% endfor %}
+            </p>
+            {% endfor %}
+            <p>
+              <!--                <label for="upload_widget">.</label>-->
+              <input id="upload_widget" type="button" name="profileID" value="Upload ProfilePic">
+            </p>
+            <p><input type="submit" value="Submit"></p>
+
+          </form>
+        {% endif %}
+        
     </div>
 
     {% load cloudinary %}

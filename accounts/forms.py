@@ -1,9 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.forms import DateInput
-
 from .models import Tenant, Owner
-from django.contrib import messages
 
 User_types = (
     ("Tenant", "Tenant"),
@@ -53,4 +51,13 @@ class createTenantProfileForm(forms.ModelForm):
         }
         widgets = {
             'bdate': DateInput(attrs={'type': 'date'}),
+        }
+
+class createOwnerProfileForm(forms.ModelForm):
+    class Meta:
+        model = Owner
+        fields = ('phone', 'adharNo')
+        labels = {
+            'phone': 'Phone : ',
+            'adharNo': 'Aadhar Number'
         }

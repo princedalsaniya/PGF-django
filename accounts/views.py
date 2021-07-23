@@ -1,6 +1,5 @@
-from cloudinary import CloudinaryImage
 from django.shortcuts import render, HttpResponse, reverse, redirect
-from .forms import LoginForm, SignUpForm, createTenantProfileForm
+from .forms import LoginForm, SignUpForm, createTenantProfileForm, createOwnerProfileForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -15,6 +14,7 @@ from django.core.mail import EmailMessage
 from .token import token_generator
 from django.template.loader import render_to_string
 
+#for photos stuff.
 import cloudinary
 
 # Create your views here.
@@ -32,31 +32,37 @@ def user_login(request):
                 if user.is_active:
                     request.session['user_type'] = user_type
 
-                    # Other way around
+                    # when user_type is "TENANT"
                     if user_type == 'Tenant':
                         tenant = Tenant.objects.filter(user=user)
                         if tenant:
                             login(request, user)
                             request.session['tenant_id'] = getattr(tenant[0], 'tenantID')
-                            return render(request, 'tenant/dashboard.html')
+                            return redirect('t_dashboard')
                         else:
                             messages.add_message(request, messages.ERROR, "You have chose wrong user type.")
                             return render(request, 'accounts/login_fail.html')
+
+                    # when user_type is "OWNER"
                     elif user_type == 'Owner':
                         owner = Owner.objects.filter(user=user)
                         if owner:
                             login(request, user)
-                            return HttpResponse('your owner id is : ', owner)
+                            request.session['owner_id'] = getattr(owner[0], 'ownerID')
+                            return redirect('o_dashboard')
                         else:
                             messages.add_message(request, messages.ERROR, "You have chose wrong user type.")
                             return render(request, 'accounts/login_fail.html')
+
+                    # when user_type is "ADMIN"
                     elif user_type == 'Admin':
                         if user.is_superuser:
                             login(request, user)
-                            return HttpResponse('Welcome Admin...')
+                            return HttpResponse("Welcome Admin.")
                         else:
                             messages.add_message(request, messages.ERROR, "You have chose wrong user type.")
                             return render(request, 'accounts/login_fail.html')
+
                 else:
                     messages.add_message(request, messages.ERROR, "Your Account is not Active. Please check your Emails. We have previously sent you an activation Link.")
                     return render(request, 'accounts/login_fail.html')
@@ -155,7 +161,7 @@ def verfy_email(request, uidb64, token):
     elif user and token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return render(request, 'accounts/email_verified.html')
+        return render(request, 'accounts/email_verified.html', {'type': request.session['new_user_type']})
 
     messages.add_message(request, messages.ERROR, "Ooohhh!! error occurred during your Email Verification.")
     return render(request, 'accounts/email_verified_fail.html')
@@ -164,11 +170,13 @@ def set_tenant(request):
     type = request.session['new_user_type']
 
     if type == 'Tenant':
-        publicID = makePID(getNextPID_tenant())
+        
+        pid = get_next_tenantID()
+        profilePicID = makePID(pid)
+
         if request.method == 'POST':
             profile_form = createTenantProfileForm(request.POST)
-            pid = getNextPID_tenant()
-            print(request.session['new_user_id'])
+        
             if profile_form.is_valid:
 
                 user = User.objects.get(id=request.session['new_user_id'])
@@ -176,22 +184,53 @@ def set_tenant(request):
                 workplace = request.POST.get('workplace')
                 adharNo = request.POST.get('adharNo')
                 bdate = request.POST.get('bdate')
-                profilePicID = makePID(pid)
+
 
                 new_tenant = Tenant(user=user, tenantID=pid, phone=phone, workplace=workplace, adharNo=adharNo, bdate=bdate, profilePicID=profilePicID)
                 new_tenant.save()
                 context = {
                     'fname': getattr(user, 'first_name'),
-                    'profielPic': cloudinary.CloudinaryImage(publicID).build_url(width = 200, height = 200, crop = 'fill')
+                    'profielPic': cloudinary.CloudinaryImage(profilePicID).build_url(width = 200, height = 200, crop = 'fill', gravity="face")
                 }
                 return render(request, './accounts/set_profile_done.html', context)
 
         profile_form = createTenantProfileForm()
-        return render(request, './accounts/set_profile_tenant.html', {'profile_form': profile_form, 'pid': publicID})
+        return render(request, './accounts/set_profile.html', {'profile_form': profile_form, 'pid': profilePicID, 'type': 'Tenant'})
 
+def set_owner(request):
+    type = request.session['new_user_type']
+
+    if type == 'Owner':
+        
+        oid = get_next_ownerID()
+        profilePicID = makePID(oid)
+
+        if request.method == 'POST':
+        
+            profile_form = createOwnerProfileForm(request.POST)
+    
+            print(request.session['new_user_id'])
+
+            if profile_form.is_valid:
+                print("The form is valid")
+
+                user = User.objects.get(id=request.session['new_user_id'])
+                phone = request.POST.get('phone')
+                adharNo = request.POST.get('adharNo')
+
+                new_tenant = Owner(user=user, ownerID=oid, phone=phone, adharNo=adharNo, profilePicID=profilePicID)
+                new_tenant.save()
+                context = {
+                    'fname': getattr(user, 'first_name'),
+                    'profielPic': cloudinary.CloudinaryImage(profilePicID).build_url(width = 200, height = 200, crop = 'fill', gravity="face")
+                }
+                return render(request, './accounts/set_profile_done.html', context)
+
+        profile_form = createOwnerProfileForm()
+        return render(request, './accounts/set_profile.html', {'profile_form': profile_form, 'pid': profilePicID, 'type': 'Owner'})
 
 #Utility Functions
-def getNextPID_tenant():
+def get_next_tenantID():
     id = 1
     lastTenant = Tenant.objects.all().last()
     if lastTenant:
@@ -201,5 +240,15 @@ def getNextPID_tenant():
     nextPID = "t" + str(id)
     return nextPID
 
-def makePID(pid):
-    return "PGF/Profiles/"+pid
+def get_next_ownerID():
+    id = 1
+    lastOwner = Owner.objects.all().last()
+    if lastOwner:
+        id = int(getattr(lastOwner, 'ownerID')[1:])+1
+        nextPID = "o" + str(id)
+        return nextPID
+    nextPID = "o" + str(id)
+    return nextPID
+
+def makePID(id):
+    return "PGF/Profiles/"+id

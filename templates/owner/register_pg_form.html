@@ -1,0 +1,32 @@
+{% extends './base.html' %}
+
+{% block title %}Register New PG{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center mt-5 p-5" style="background-color: #e0e0e0">
+        <div class="container col-6">
+            <h1>You want to Register New PG {{ user.first_name }}?</h1>
+            <p class="fs-5 text-muted">You just need to fill up the given form.</p>
+        </div>
+    </div>
+
+    <div class="container col-6 text-center mt-4 p-3">
+        <form action="{% url 'o_register_pg_details' %}" method="post">
+            {% csrf_token %}
+            {% for field in register_form %}
+            <p>
+                {{ field.label }}
+                {{ field }}
+                {% if field.help_text %}
+                  <small style="display: none">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                  <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            </p>
+            {% endfor %}
+            <p><input type="submit" value="Register"></p>
+        </form>
+    </div>
+{% endblock %}

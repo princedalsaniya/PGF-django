@@ -1,0 +1,15 @@
+{% extends './base.html' %}
+
+{% block title %}Registration Finished{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center mt-5 p-5" style="background-color: #e0e0e0">
+        <div class="container col-6">
+            <h1>Congratulations!!</h1>
+            <p class="fs-5 text-muted">Your PG application is successfully placed, {{ user.first_name }}.</p>
+            <p class="fs-5 text-muted">Go to the <a href="{% url 'o_register_success' %}">list</a> of your PGs.</p>
+        </div>
+    </div>
+
+{% endblock %}

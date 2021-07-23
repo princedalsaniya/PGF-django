@@ -7,10 +7,10 @@ urlpatterns = [
     path('logout/', user_logout, name="logout"),
     path('signup/', signup, name="signup"),
     path('verfiyEmail/<uidb64>/<token>', verfy_email, name="verfiyEmail"),
-    path('test/', getNextPID_tenant, name="test"),
 
     #Setting Profiles
     path('set_tenant/', set_tenant, name="set_tenant"),
+    path('set_owner/', set_owner, name="set_owner"),
 
     #Password Changing.
     path('password_change/',av.PasswordChangeView.as_view(), name='password_change'),

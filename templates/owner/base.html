@@ -12,6 +12,7 @@
     <style>
       a {
         text-decoration: none !important;
+        color: black;
       }
       .errorlist {
         display: none;
@@ -29,7 +30,7 @@
     <nav class="navbar navbar-expand-lg navbar-light">
       <div class="container py-3 px-3" style="border-bottom: 2px solid rgb(45,65,85)">
 
-        <a class="navbar-brand fs-1" href="#"> <strong>PGFinder</strong></a>
+        <a class="navbar-brand fs-1" href="{% url 'o_dashboard' %}"> <strong>PGFinder</strong></a>
 
         <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
           <div class="navbar-nav fs-4">
@@ -52,11 +53,11 @@
         <div class="offcanvas-body text-center">
 
             {% load cloudinary %}
-            <img src={{profilePic}} alt="Profile" style="border-radius: 50%; border: 4px solid black;">
+            <img src={{profilePic}} >
             <p class="text-center text-dark fs-5 m-3">{{ user.first_name }} {{ user.last_name }}</p>
             <hr>
             <a href="#" class="nav-link fs-4 active text-dark font-weight-bold">PG List</a>
-            <a href="#" class="nav-link fs-4 active text-dark font-weight-bold">Applications</a>
+            <a href="{% url 'o_register_pg_details' %}" class="nav-link fs-4 active text-dark font-weight-bold">Register New PG</a>
             <a href="#" class="nav-link fs-4 active text-dark font-weight-bold">Notifications</a>
             <a href="#" class="nav-link fs-4 active text-dark font-weight-bold">Profile</a>
             <a class="nav-link fs-4 active text-dark" href="{% url 'logout' %}">Logout</a>
