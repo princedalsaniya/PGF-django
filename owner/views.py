@@ -272,7 +272,7 @@ def delete_photo(request, photoPID):
 
 def upload_new_photo(request):
     upload_form = register_photo_form(request.POST or None)
-    pgID = request.session['new_pgID']
+    pgID = request.session['curr_pgID']
     photoPID = get_next_photoPID(pgID)
     pid = "PGF/PG_Photos/" + pgID + "_" + photoPID
     context = {
