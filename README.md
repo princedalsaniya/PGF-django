@@ -38,5 +38,30 @@ This project was built in hurry, and more of a backend centric project. So, I ha
 	
 ## Now let's have a look at Screen Shots of some screens.
 
-* Login
+* **Login**
+ 
 ![Login Page](./PGF_ss/Login.png)
+
+* **Dashboard**
+
+![Login Page](./PGF_ss/t_dashboard.png)
+
+* **PG-List with non-approved PG**
+
+![Login Page](./PGF_ss/na_pgList.png)
+
+* **PG-List with approved PG**
+
+![Login Page](./PGF_ss/a_pglist.png)
+
+* **PG details**
+
+![Login Page](./PGF_ss/pgdetails.png)
+
+* **PG Facilities and Rules**
+
+![Login Page](./PGF_ss/facilities_and_rules.png)
+
+* **PG Photos**
+
+![Login Page](./PGF_ss/pgPhotos.png)
