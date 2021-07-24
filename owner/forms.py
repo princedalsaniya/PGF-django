@@ -78,3 +78,10 @@ class register_photo_form(forms.ModelForm):
         labels = {
             'message': 'Description of Photo : '
         }
+
+class edit_profile_form(forms.Form):
+    username = forms.CharField(label='Username : ', max_length=100)
+    first_name = forms.CharField(label='First Name : ', max_length=100)
+    last_name = forms.CharField(label='Last Name : ', max_length=100)
+    password = forms.CharField(label="Password : ", widget=forms.PasswordInput)
+    phone = forms.CharField(label='Phone Number : ', max_length=10)

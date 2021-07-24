@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'll@u5o=j5bsp$7kua&l)j_k+kbvmu1bj-u2zd$xba_5yg=86nt'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -134,8 +135,8 @@ STATICFILES_DIRS = [
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackends'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'princeforstudy@gmail.com'
-EMAIL_HOST_PASSWORD = 'prince9558867506'
+EMAIL_HOST_USER = config("EMAIL_ID")
+EMAIL_HOST_PASSWORD = config("EMAIL_PASSWORD")
 EMAIL_USE_TLS = True
 
 #Cloudinary stuff is here.
@@ -143,8 +144,8 @@ EMAIL_USE_TLS = True
 import cloudinary
 
 cloudinary.config(
-  cloud_name= "princedalsaniya",
-  api_key= "129677266313812",
-  api_secret= "JhCu-ovlc6c4dqle4JGFDD7Ga-I",
+  cloud_name= config("CLOUD_NAME"),
+  api_key= config("API_KEY"),
+  api_secret= config("API_SECRET"),
   secure= True
 )

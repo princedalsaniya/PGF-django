@@ -288,6 +288,11 @@ def upload_new_photo(request):
         return redirect('pg_details', pgID)
     return render(request, './owner/upload_new_photo.html', context)
 
+@login_required
+def o_profile(request):
+    owner = Owner.objects.get(user=request.user)
+
+
 #Utility Functions
 def get_next_pgID():
     lastPg = pgDetails.objects.all().last()
